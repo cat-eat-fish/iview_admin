@@ -24,34 +24,18 @@ export default {
     buildTooltip (h, item) {
       const { iconSize, turnToPage } = this
       return h('Tooltip', {
-          style: {
-            display: 'block',
-            textAlign: 'center',
-            padding: '20px 0',
-            cursor: 'pointer'
-          },
-          props: {
-            transfer: true,
-            placement: 'right'
-          },
-          on: {
-          }
+          style: {display: 'block',textAlign: 'center',padding: '20px 0',cursor: 'pointer'},
+          props: {transfer: true,placement: 'right'},
+          on: {}
         }, [
           h('div', [
               h('Icon', {
-                props: {
-                  type: item.meta.icon,
-                  size: iconSize
-                },
-                on: {
-                  'click': () => { turnToPage(item)} 
-                }
+                props: {type: item.meta.icon,size: iconSize},
+                on: {'click': () => { turnToPage(item)} }
               })
             ]
           ),
-          h('div', {
-              slot: 'content'
-            }, 
+          h('div', {slot: 'content'}, 
             item.meta.title
           ),
         ]
@@ -60,27 +44,13 @@ export default {
     buildDropdown (h, item) {
       const { iconSize, buildDropdown, turnToPage } = this
       return h('Dropdown', {
-          style: {
-            display: 'block',
-            textAlign: 'center',
-            padding: '20px 0',
-            cursor: 'pointer',
-            color: '#fff'
-          },
-          props: {
-            transfer: true,
-            placement: 'right-start'
-          },
-          on: {
-            'on-click': turnToPage
-          }
+          style: {display: 'block',textAlign: 'center',padding: '20px 0',cursor: 'pointer',color: '#fff'},
+          props: {transfer: true,placement: 'right-start'},
+          on: {'on-click': turnToPage}
         }, [
           h('div', [
             h('Icon', {
-              props: {
-                type: item.meta.icon,
-                size: iconSize
-              }
+              props: {type: item.meta.icon,size: iconSize}
             })
           ]),
           h('DropdownMenu', {
@@ -91,15 +61,10 @@ export default {
                 return buildDropdown(h, child)
               } else {
                 return h('DropdownItem', {
-                  props: {
-                    name: child.name
-                  }
+                  props: {name: child.name}
                 }, [
                   h('Icon', {
-                    props: {
-                      type: child.meta.icon,
-                      size: iconSize
-                    }
+                    props: {type: child.meta.icon,size: iconSize}
                   }),
                   child.meta.title
                 ])
