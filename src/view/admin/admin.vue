@@ -3,8 +3,9 @@
         <p slot="title">
             <!-- <count-to :end="2534" count-class="count-text" unit-class="unit-class" :decimals="2"></count-to> -->
             
-            <Button type="success" @click="modal1 = true"><Icon type="md-add" />添加管理员</Button>
+            <Button type="success" @click="addmodal = true"><Icon type="md-add" />添加管理员</Button>
         </p>
+        <!-- 添加管理员 -->
         <Modal
             v-model="addmodal"
             title="添加管理员"
@@ -40,7 +41,7 @@
                 </FormItem>
                 
                 <FormItem label="备注" prop="desc">
-                    <Input v-model="formValidate.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入一些备注吧..."></Input>
+                    <Input v-model="formValidate.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入一些备注吧..." />
                 </FormItem>
                 <FormItem>
                     <Button type="primary" @click="handleSubmit('formValidate')">提交</Button>
@@ -52,8 +53,8 @@
         <Modal
             v-model="editmodal"
             title="编辑管理员"
-            @on-ok="ok"
-            @on-cancel="cancel">
+            @on-ok="editok"
+            @on-cancel="editcancel">
             <Form ref="editformValidate" :model="editformValidate" :rules="editruleValidate" :label-width="80">
                 <FormItem label="用户名" prop="username">
                     <Input v-model="editformValidate.username" placeholder="请输入您的登录用户名"  />
@@ -63,9 +64,6 @@
                 </FormItem>
                 <FormItem label="密码" prop="password">
                     <Input v-model="editformValidate.password" placeholder="请输入您的登录密码" />
-                </FormItem>
-                <FormItem label="重复密码" prop="password2">
-                    <Input v-model="editformValidate.password2" placeholder="请重复输入您的登录密码" />
                 </FormItem>
                 <FormItem label="手机号码" prop="phone">
                     <Input v-model="editformValidate.phone" placeholder="请输入您的联系方式" />
@@ -84,7 +82,7 @@
                 </FormItem>
                 
                 <FormItem label="备注" prop="desc">
-                    <Input v-model="editformValidate.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入一些备注吧..."></Input>
+                    <Input v-model="editformValidate.desc" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入一些备注吧..."  />
                 </FormItem>
                 <FormItem>
                     <Button type="primary" @click="handleSubmit('formValidate')">提交</Button>
@@ -141,8 +139,8 @@
 </template>
 
 <script>
+import addressJson from "@/api/address.json"
 import axios from 'axios'
-import { userData } from '@/api/userdata'
 import CountTo from '_c/count-to'
 export default {
   components: {
@@ -153,23 +151,23 @@ export default {
     return {
         citydata: [
             {
-                value: 'beijing',label: '北京',
-                children: [{value: 'gugong',label: '故宫'},{value: 'tiantan',label: '天坛'},{value: 'wangfujing',label: '王府井'}]
+                value: '北京',label: '北京',
+                children: [{value: '故宫',label: '故宫'},{value: '天坛',label: '天坛'},{value: '王府井',label: '王府井'}]
             }, 
             {
-                value: 'jiangsu',label: '江苏',
+                value: '江苏',label: '江苏',
                 children: [
-                    {value: 'nanjing',label: '南京',
-                        children: [{value: 'fuzimiao',label: '夫子庙',}]
+                    {value: '南京',label: '南京',
+                        children: [{value: '夫子庙',label: '夫子庙',}]
                     },
-                    {value: 'suzhou',label: '苏州',
-                        children: [{value: 'zhuozhengyuan',label: '拙政园',},{value: 'shizilin',label: '狮子林',}]
+                    {value: '苏州',label: '苏州',
+                        children: [{value: '拙政园',label: '拙政园',},{value: '狮子林',label: '狮子林',}]
                     }
                 ],
             }
         ],
         formValidate: {username:'', name: '',password: "",password2:"",phone:"",card:"", gender: '',city:[],desc: ''},
-        editformValidate: {username:'', name: '',password: "",password2:"",phone:"",card:"", gender: '',city:[],desc: ''},
+        editformValidate: {username:'', name: '',password: "",phone:"",card:"", gender: '',city:[],desc: ''},
         ruleValidate: {
             username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
             // name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
@@ -189,9 +187,8 @@ export default {
             username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
             // name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
             password:[{ required: true, message: '登录密码不能为空', trigger: 'blur' }],
-            password2:[{ required: true, message: '重复登录密码不能为空', trigger: 'blur' }],
             phone: [{ required: true, message: '联系方式不能为空', trigger: 'blur' }],
-            // city: [{ required: true, message: '请选择所在城市', trigger: 'blur' }],
+            // address: [{ required: true, message: '请选择所在城市', trigger: 'blur' }],
             // gender: [
             //     { required: true, message: 'Please select gender', trigger: 'change' }
             // ],
@@ -319,7 +316,7 @@ export default {
                     // }
     　　　　     }
             },
-            {title: '注册日期',key: 'date',width: 180,align: 'center',
+            {title: '注册时间',key: 'date',width: 180,align: 'center',
                 // render: (h, params) => {
                 //     if (params.row.$isEdit) {
                 //         return h('DatePicker', {
@@ -339,6 +336,7 @@ export default {
                 //     }
                 // }
             },
+            {title: '注册地点',key: 'registeraddress',width: 180,align: 'center',},
             {title: '身份证号',key: 'card',width: 180,align: 'center',},
             {title: '城市',key: 'address',width: 250,align: 'center',
                 
@@ -357,7 +355,7 @@ export default {
                             style: {marginRight: '5px'},
                             on: {click: () => {
                                     // if (params.row.$isEdit) {this.handleSave(params.row)} else {this.handleEdit(params.row)}
-                                    console.log(params.row)
+                                    params.row.city = params.row.address.split("-");
                                     this.editformValidate = params.row
                                     this.editmodal = true;
                                 }
@@ -388,7 +386,36 @@ export default {
     }
   },
   computed:{
-    
+      addressdata:function(){
+          var e = addressJson.citylist;
+          var city = {};
+          var p = [];
+            if(e.length !== 0){
+                e.map((item,index)=>{
+                    p[index]={};
+                    p[index].value = item.value;
+                    p[index].label = item.value;
+                    p[index].children = [];
+                    if(item.c){
+                        item.c.map((item2,index2)=>{
+                            p[index].children[index2] = {};
+                            p[index].children[index2].value = item2.n;
+                            p[index].children[index2].label = item2.n;
+                            p[index].children[index2].children = [];
+                            if(item2.a){
+                                item2.a.map((item3,index3)=>{
+                                    p[index].children[index2].children[index3] = [];
+                                    p[index].children[index2].children[index3].value = item3.s;
+                                    p[index].children[index2].children[index3].label = item3.s;
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+            // city.p = p;
+          return p
+      }
   },
   mounted(){
     //   this.uploadList = this.$refs.upload.fileList;
@@ -403,11 +430,10 @@ export default {
     //    }
   },
   created(){
+      this.citydata = this.addressdata;
     var that = this
-    axios({
-        method: 'post',
-        url: '/api/admin'
-    }).then(function(res){
+    axios({method: 'post',url: '/api/admin'})
+    .then(function(res){
         var data = res.data;
         data.map((item,index)=>{
             item.thumb = "http://localhost:3000"+(item.thumb.substr(8))
@@ -419,6 +445,18 @@ export default {
     })
   },
   methods: {
+      getType(obj) {
+          var type = typeof obj;
+          if (type !== 'object') {
+            return type;
+          }
+          //如果不是object类型的数据，直接用typeof就能判断出来
+          //如果是object类型数据，准确判断类型必须使用Object.prototype.toString.call(obj)的方式才能判断
+          return Object.prototype.toString.call(obj).replace(/^[object (S+)]$/, '$1');
+        },
+    recursion(e){
+        
+    },
     show (index) {
         this.$Modal.info({
             title: '用户信息',
@@ -490,6 +528,8 @@ export default {
         this.file = file;
         return false;
     },
+    editok(){},
+    editcancel(){},
     ok () {this.$Message.info('Clicked ok');},
     cancel () {this.$Message.info('Clicked cancel');},
     handleSubmit (name) {
